@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#efede7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#090b10" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet" />
+  <title>3D Showcase</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #efede7;
+      --ink: #17191f;
+      --muted: #5f626b;
+      --line: rgba(23, 25, 31, .19);
+      --accent: #f04e30;
+      --accent-soft: rgba(240, 78, 48, .1);
+      --panel: rgba(239, 237, 231, .78);
+      --focus: #0b63ce;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #090b10;
+        --ink: #f0eee9;
+        --muted: #a8abb3;
+        --line: rgba(240, 238, 233, .18);
+        --accent: #ff684d;
+        --accent-soft: rgba(255, 104, 77, .12);
+        --panel: rgba(9, 11, 16, .76);
+        --focus: #68b6ff;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
+    body {
+      font-family: "IBM Plex Sans Thai", sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; }
+    button:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+
+    .experience {
+      position: relative;
+      min-height: 100svh;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    #stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: grab;
+      z-index: -2;
+    }
+    #stage:active { cursor: grabbing; }
+    .grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      opacity: .12;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+    @media (prefers-color-scheme: dark) { .grain { mix-blend-mode: screen; opacity: .07; } }
+
+    .frame {
+      min-height: 100svh;
+      padding: clamp(22px, 4vw, 54px);
+      display: grid;
+      grid-template-columns: minmax(240px, 0.78fr) minmax(360px, 1.6fr) minmax(190px, .56fr);
+      grid-template-rows: auto 1fr auto;
+      gap: 24px;
+      pointer-events: none;
+    }
+    .frame::before,
+    .frame::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+    .frame::before { left: clamp(22px, 4vw, 54px); right: clamp(22px, 4vw, 54px); top: 50%; border-top: 1px solid var(--line); }
+    .frame::after { top: clamp(22px, 4vw, 54px); bottom: clamp(22px, 4vw, 54px); left: 50%; border-left: 1px solid var(--line); }
+
+    .intro { grid-column: 1; grid-row: 1 / span 2; max-width: 360px; align-self: start; pointer-events: auto; }
+    .index {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: .02em;
+      margin-bottom: clamp(38px, 8vh, 92px);
+    }
+    .index .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+    h1 {
+      margin: 0;
+      max-width: 7ch;
+      font-size: clamp(44px, 6.4vw, 104px);
+      font-weight: 300;
+      line-height: .93;
+      letter-spacing: -.058em;
+    }
+    h1 em {
+      display: block;
+      font-family: "Playfair Display", serif;
+      font-size: .94em;
+      font-weight: 600;
+      letter-spacing: -.045em;
+    }
+    .lead {
+      max-width: 30ch;
+      margin: 30px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 1.15vw, 18px);
+      line-height: 1.65;
+    }
+
+    .catalogue {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+      align-self: center;
+      pointer-events: auto;
+    }
+    .catalogue-label { margin: 0 0 16px; font-size: 13px; color: var(--muted); }
+    .scene-list { border-top: 1px solid var(--line); }
+    .scene {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 17px 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      cursor: pointer;
+      transition: color .25s ease;
+    }
+    .scene:hover { color: var(--ink); }
+    .scene[aria-pressed="true"] { color: var(--ink); }
+    .scene .no { font-size: 12px; font-variant-numeric: tabular-nums; }
+    .scene .name { font-size: 15px; font-weight: 500; }
+    .scene .mark {
+      width: 9px;
+      height: 9px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      transition: background .2s ease, border-color .2s ease;
+    }
+    .scene[aria-pressed="true"] .mark { background: var(--accent); border-color: var(--accent); }
+
+    .caption {
+      grid-column: 1 / span 2;
+      grid-row: 3;
+      align-self: end;
+      display: flex;
+      align-items: flex-end;
+      gap: clamp(24px, 5vw, 72px);
+      pointer-events: auto;
+    }
+    .work-name { min-width: 155px; }
+    .work-name strong { display: block; font-size: 19px; font-weight: 600; }
+    .work-name span, .work-note { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .work-note { max-width: 42ch; }
+    .controls {
+      grid-column: 3;
+      grid-row: 3;
+      align-self: end;
+      justify-self: stretch;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      pointer-events: auto;
+    }
+    .hint { color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .pause {
+      flex: none;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+    .pause svg { width: 15px; height: 15px; fill: currentColor; }
+    .fallback {
+      display: none;
+      position: absolute;
+      width: min(55vw, 580px);
+      aspect-ratio: 1;
+      left: 50%;
+      top: 50%;
+      translate: -50% -50%;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 12vw var(--accent-soft), 0 0 0 1px var(--line);
+      animation: fallbackSpin 12s linear infinite;
+      z-index: -1;
+    }
+    .fallback::before, .fallback::after {
+      content: "";
+      position: absolute;
+      inset: 23%;
+      border: 2px solid var(--accent);
+      transform: rotate(45deg);
+    }
+    .fallback::after { transform: rotate(15deg) scale(.68); border-radius: 50%; }
+    @keyframes fallbackSpin { to { rotate: 360deg; } }
+
+    @media (max-width: 820px) {
+      .frame {
+        min-height: 100svh;
+        padding: 22px 20px max(20px, env(safe-area-inset-bottom));
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto auto;
+        gap: 14px;
+      }
+      .frame::before { left: 20px; right: 20px; top: 46%; }
+      .frame::after { display: none; }
+      .intro { grid-column: 1; grid-row: 1; max-width: 88%; }
+      .index { margin-bottom: 20px; }
+      h1 { font-size: clamp(46px, 15.5vw, 72px); max-width: 6.5ch; }
+      .lead { margin-top: 16px; max-width: 26ch; font-size: 14px; }
+      .catalogue { grid-column: 1; grid-row: 3; align-self: auto; }
+      .catalogue-label { display: none; }
+      .scene-list { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .scene {
+        grid-template-columns: 1fr auto;
+        padding: 13px 8px 11px 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .scene + .scene { padding-left: 10px; border-left: 1px solid var(--line); }
+      .scene .no { display: none; }
+      .scene .name { font-size: 13px; }
+      .caption { grid-column: 1; grid-row: 4; align-items: center; gap: 16px; }
+      .work-name { min-width: 112px; }
+      .work-name strong { font-size: 15px; }
+      .work-note { font-size: 11px; }
+      .controls { position: absolute; right: 20px; top: 22px; width: auto; }
+      .hint { display: none; }
+      .pause { width: 38px; height: 38px; }
+      #stage { top: 22%; height: 58%; }
+      .fallback { width: 76vw; top: 56%; }
+    }
+    @media (max-width: 430px) and (max-height: 720px) {
+      .lead { display: none; }
+      h1 { font-size: 52px; }
+      #stage { top: 18%; height: 56%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scene, .scene .mark { transition: none; }
+      .fallback { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="experience" aria-label="นิทรรศการวัตถุสามมิติแบบโต้ตอบ">
+    <canvas id="stage" aria-label="ประติมากรรมสามมิติแบบโต้ตอบ ลากเพื่อหมุน"></canvas>
+    <div class="fallback" id="fallback" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="frame">
+      <section class="intro">
+        <div class="index"><span class="dot" aria-hidden="true"></span><span>Digital material study · 2026</span></div>
+        <h1>วัตถุที่<br><em>เป็นไปไม่ได้</em></h1>
+        <p class="lead">สามการทดลองของพื้นผิว แสง และรูปทรงที่ไม่มีวันหยุดนิ่ง ลากชิ้นงานเพื่อมองจากทุกมุม</p>
+      </section>
+
+      <nav class="catalogue" aria-label="เลือกชิ้นงาน">
+        <p class="catalogue-label">สามสภาวะของสสาร</p>
+        <div class="scene-list">
+          <button class="scene" type="button" data-mode="0" aria-pressed="true"><span class="no">01</span><span class="name">วงโคจร</span><span class="mark" aria-hidden="true"></span></button>
+          <button class="scene" type="button" data-mode="1" aria-pressed="false"><span class="no">02</span><span class="name">รอยพับ</span><span class="mark" aria-hidden="true"></span></button>
+          <button class="scene" type="button" data-mode="2" aria-pressed="false"><span class="no">03</span><span class="name">ชีพจร</span><span class="mark" aria-hidden="true"></span></button>
+        </div>
+      </nav>
+
+      <section class="caption" aria-live="polite">
+        <div class="work-name"><strong id="workTitle">วงโคจร</strong><span id="workMeta">โครงสร้างต่อเนื่อง · 01</span></div>
+        <p class="work-note" id="workNote">วงแหวนสามแกนสอดประสานกัน เคลื่อนผ่านช่องว่างโดยไม่ชนกัน</p>
+      </section>
+
+      <div class="controls">
+        <span class="hint">ลากเพื่อหมุน<br>เลื่อนเพื่อซูม</span>
+        <button class="pause" id="pause" type="button" aria-label="หยุดการเคลื่อนไหว" aria-pressed="false">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path id="pauseIcon" d="M3 2h3v12H3zm7 0h3v12h-3z"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+  var canvas = document.getElementById('stage');
+  var fallback = document.getElementById('fallback');
+  var gl = canvas.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'high-performance' });
+  if (!gl) { canvas.style.display = 'none'; fallback.style.display = 'block'; return; }
+
+  var vertexSource = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var fragmentSource = [
+    'precision highp float;',
+    'uniform vec2 r; uniform float t; uniform float yaw; uniform float pitch; uniform float zoom; uniform float mode; uniform float dark;',
+    '#define MAX_STEPS 88',
+    '#define FAR 8.0',
+    'mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}',
+    'float boxS(vec3 p,vec3 b,float rr){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.)-rr;}',
+    'float torus(vec3 p,vec2 k){vec2 q=vec2(length(p.xz)-k.x,p.y);return length(q)-k.y;}',
+    'float sphere(vec3 p,float s){return length(p)-s;}',
+    'float map(vec3 p){',
+      'p.xz*=rot(yaw); p.yz*=rot(pitch);',
+      'if(mode<.5){',
+        'float a=torus(p,vec2(.92,.17));',
+        'float b=torus(p.yzx,vec2(.92,.17));',
+        'float c=torus(p.zxy,vec2(.92,.17));',
+        'return min(a,min(b,c));',
+      '}else if(mode<1.5){',
+        'p.xz*=rot(p.y*.72+sin(t*.28)*.12);',
+        'float shell=boxS(p,vec3(.76),.2);',
+        'float cut=-sphere(p,1.0);',
+        'return max(shell,cut);',
+      '}else{',
+        'float pulse=.03*sin(t*1.5);',
+        'float g=abs(dot(sin(p*3.1+t*.08),cos(p.yzx*3.1-t*.06)))/3.1-.105-pulse;',
+        'return max(g,sphere(p,1.18));',
+      '}',
+    '}',
+    'vec3 normalAt(vec3 p){vec2 e=vec2(.0015,0.);return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}',
+    'float march(vec3 ro,vec3 rd){float d=0.;for(int i=0;i<MAX_STEPS;i++){float h=map(ro+rd*d);if(abs(h)<.0015||d>FAR)break;d+=h*.72;}return d;}',
+    'void main(){',
+      'vec2 uv=(gl_FragCoord.xy*2.-r.xy)/min(r.x,r.y);',
+      'vec3 ro=vec3(0.,0.,zoom); vec3 rd=normalize(vec3(uv,-1.72));',
+      'float d=march(ro,rd);',
+      'vec3 bgA=mix(vec3(.937,.929,.902),vec3(.035,.043,.063),dark);',
+      'vec3 bgB=mix(vec3(.82,.84,.85),vec3(.075,.082,.11),dark);',
+      'vec3 col=mix(bgA,bgB,smoothstep(-.9,.9,uv.y));',
+      'float vign=1.-.12*dot(uv*.52,uv*.52); col*=vign;',
+      'if(d<FAR){',
+        'vec3 pos=ro+rd*d; vec3 n=normalAt(pos);',
+        'vec3 light=normalize(vec3(-.6,.75,.8));',
+        'float dif=max(dot(n,light),0.); float rim=pow(1.-max(dot(n,-rd),0.),2.4);',
+        'float spec=pow(max(dot(reflect(-light,n),-rd),0.),34.);',
+        'vec3 base=mix(vec3(.92,.19,.09),vec3(1.,.35,.21),.5+.5*n.y);',
+        'if(mode>.5&&mode<1.5) base=mix(vec3(.06,.34,.76),vec3(.2,.69,.94),.5+.5*n.x);',
+        'if(mode>1.5) base=mix(vec3(.94,.55,.05),vec3(.96,.17,.08),.5+.5*n.z);',
+        'float bands=.86+.14*cos((pos.y+pos.x*.18)*24.);',
+        'col=base*(.24+.77*dif)*bands+spec*vec3(1.4)+rim*base*.68;',
+        'float fog=smoothstep(3.2,6.2,d); col=mix(col,bgA,fog);',
+      '}',
+      'col=pow(max(col,0.),vec3(.92)); gl_FragColor=vec4(col,1.);',
+    '}'
+  ].join('\n');
+
+  function shader(type, source) {
+    var s = gl.createShader(type); gl.shaderSource(s, source); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
+    return s;
+  }
+  var vs = shader(gl.VERTEX_SHADER, vertexSource), fs = shader(gl.FRAGMENT_SHADER, fragmentSource);
+  if (!vs || !fs) { canvas.style.display = 'none'; fallback.style.display = 'block'; return; }
+  var program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { canvas.style.display = 'none'; fallback.style.display = 'block'; return; }
+  gl.useProgram(program);
+  var buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  var pos = gl.getAttribLocation(program, 'p'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  var u = {};
+  ['r','t','yaw','pitch','zoom','mode','dark'].forEach(function(k){ u[k]=gl.getUniformLocation(program,k); });
+
+  var state = { yaw: -.38, pitch: -.34, zoom: 3.45, mode: 0, paused: false, dragging: false, x: 0, y: 0, time: 0, last: performance.now() };
+  var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) state.paused = true;
+  var darkQuery = matchMedia('(prefers-color-scheme: dark)');
+  var sceneData = [
+    { title:'วงโคจร', meta:'โครงสร้างต่อเนื่อง · 01', note:'วงแหวนสามแกนสอดประสานกัน เคลื่อนผ่านช่องว่างโดยไม่ชนกัน' },
+    { title:'รอยพับ', meta:'ปริมาตรกลวง · 02', note:'ลูกบาศก์ถูกบิด เปิดแก่นด้านใน และรักษาสมดุลระหว่างมวลกับช่องว่าง' },
+    { title:'ชีพจร', meta:'สนามต่อเนื่อง · 03', note:'พื้นผิวเรขาคณิตเต้นเป็นจังหวะ เปลี่ยนความแข็งให้กลายเป็นการเคลื่อนไหว' }
+  ];
+
+  function resize(){
+    var dpr=Math.min(devicePixelRatio||1, window.innerWidth<700?1.35:1.7);
+    var w=Math.round(canvas.clientWidth*dpr), h=Math.round(canvas.clientHeight*dpr);
+    if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
+  }
+  function draw(now){
+    resize();
+    var dt=Math.min((now-state.last)/1000,.05); state.last=now;
+    if(!state.paused) state.time+=dt;
+    gl.uniform2f(u.r,canvas.width,canvas.height); gl.uniform1f(u.t,state.time); gl.uniform1f(u.yaw,state.yaw); gl.uniform1f(u.pitch,state.pitch); gl.uniform1f(u.zoom,state.zoom); gl.uniform1f(u.mode,state.mode); gl.uniform1f(u.dark,darkQuery.matches?1:0);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  canvas.addEventListener('pointerdown',function(e){state.dragging=true;state.x=e.clientX;state.y=e.clientY;canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',function(e){if(!state.dragging)return;state.yaw+=(e.clientX-state.x)*.008;state.pitch=Math.max(-1.15,Math.min(1.15,state.pitch+(e.clientY-state.y)*.008));state.x=e.clientX;state.y=e.clientY;});
+  canvas.addEventListener('pointerup',function(){state.dragging=false;});
+  canvas.addEventListener('pointercancel',function(){state.dragging=false;});
+  canvas.addEventListener('wheel',function(e){e.preventDefault();state.zoom=Math.max(2.65,Math.min(4.8,state.zoom+e.deltaY*.002));},{passive:false});
+
+  var buttons=[].slice.call(document.querySelectorAll('.scene'));
+  buttons.forEach(function(button){button.addEventListener('click',function(){
+    state.mode=Number(button.getAttribute('data-mode'));
+    buttons.forEach(function(b){b.setAttribute('aria-pressed',b===button?'true':'false');});
+    var d=sceneData[state.mode]; document.getElementById('workTitle').textContent=d.title; document.getElementById('workMeta').textContent=d.meta; document.getElementById('workNote').textContent=d.note;
+  });});
+  var pause=document.getElementById('pause'), icon=document.getElementById('pauseIcon');
+  if(reduceMotion){pause.setAttribute('aria-pressed','true');pause.setAttribute('aria-label','เริ่มการเคลื่อนไหว');icon.setAttribute('d','M4 2l9 6-9 6z');}
+  pause.addEventListener('click',function(){state.paused=!state.paused;pause.setAttribute('aria-pressed',state.paused?'true':'false');pause.setAttribute('aria-label',state.paused?'เริ่มการเคลื่อนไหว':'หยุดการเคลื่อนไหว');icon.setAttribute('d',state.paused?'M4 2l9 6-9 6z':'M3 2h3v12H3zm7 0h3v12h-3z');});
+})();
+</script>
+</body>
+</html>
